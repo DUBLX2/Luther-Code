@@ -1,12 +1,12 @@
 import os
 
 # Database configuration
-DB_PATH = os.path.join(os.path.dirname(__file__), "library.db")
+DB_PATH = "D:\\tenta\\Documents\\Luther-Code\\library.db"
 
 
 # Email settings
-EMAIL_USER = "lutherHlungwani3@gmail.com"
-EMAIL_APP_PASSWORD = "your_app_password"  # Use App Password
+EMAIL_USER = "tentacionx688@gmail.com"
+EMAIL_APP_PASSWORD = "K@tleho458"  # Use App Password
 
 # Fine settings
 FINE_PER_DAY = 0.50

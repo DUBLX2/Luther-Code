@@ -1,6 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
-from database.db_manager import get_all_books, get_all_members, get_overdue_transactions, get_recent_transactions, get_popular_books
+from database.db_manager import (
+    get_all_books,
+    get_all_members,
+    get_overdue_transactions,
+    get_recent_transactions,
+    get_popular_books
+)
 
 class DashboardFrame(tk.Frame):
     def __init__(self, parent):
@@ -32,7 +38,7 @@ class DashboardFrame(tk.Frame):
         overdue_label.pack(side="left", padx=20)
 
         # Recent Transactions
-        recent_frame = tk.LabelFrame(self, text="Recent Transactions", font=("Arial", 12))
+        recent_frame = tk.LabelFrame(self, text="Recent Transactions")
         recent_frame.pack(fill="x", padx=20, pady=10)
 
         recent_tree = ttk.Treeview(recent_frame, columns=("ID", "Member", "Book", "Date", "Status"), show="headings", height=5)
@@ -41,6 +47,13 @@ class DashboardFrame(tk.Frame):
         recent_tree.heading("Book", text="Book")
         recent_tree.heading("Date", text="Date")
         recent_tree.heading("Status", text="Status")
+
+        # Set column widths
+        recent_tree.column("ID", width=50)
+        recent_tree.column("Member", width=150)
+        recent_tree.column("Book", width=200)
+        recent_tree.column("Date", width=100)
+        recent_tree.column("Status", width=100)
 
         for trans in get_recent_transactions():
             recent_tree.insert("", "end", values=trans)
@@ -51,12 +64,16 @@ class DashboardFrame(tk.Frame):
         scrollbar_recent.pack(side="right", fill="y")
 
         # Popular Books
-        popular_frame = tk.LabelFrame(self, text="Popular Books", font=("Arial", 12))
+        popular_frame = tk.LabelFrame(self, text="Popular Books")
         popular_frame.pack(fill="x", padx=20, pady=10)
 
         popular_tree = ttk.Treeview(popular_frame, columns=("Title", "Times Borrowed"), show="headings", height=5)
         popular_tree.heading("Title", text="Title")
         popular_tree.heading("Times Borrowed", text="Times Borrowed")
+
+        # Set column widths
+        popular_tree.column("Title", width=250)
+        popular_tree.column("Times Borrowed", width=150)
 
         for book in get_popular_books():
             popular_tree.insert("", "end", values=book)

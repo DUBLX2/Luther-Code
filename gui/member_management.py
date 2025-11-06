@@ -14,7 +14,7 @@ class MemberManagementFrame(tk.Frame):
         title_label.pack(pady=10)
 
         # Form Frame
-        form_frame = tk.LabelFrame(self, text="Member Details", font=("Arial", 12))
+        form_frame = tk.LabelFrame(self, text="Member Details")
         form_frame.pack(fill="x", padx=20, pady=10)
 
         # Membership Number
@@ -56,11 +56,10 @@ class MemberManagementFrame(tk.Frame):
         # Buttons
         button_frame = tk.Frame(self)
         button_frame.pack(pady=10)
-
         tk.Button(button_frame, text="Register Member", command=self.register_member).pack(side="left", padx=5)
 
         # Member List
-        list_frame = tk.LabelFrame(self, text="Members", font=("Arial", 12))
+        list_frame = tk.LabelFrame(self, text="Members")
         list_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         self.member_tree = ttk.Treeview(list_frame, columns=("ID", "Number", "Name", "Email", "Phone", "Type"), show="headings", height=10)
@@ -71,6 +70,14 @@ class MemberManagementFrame(tk.Frame):
         self.member_tree.heading("Phone", text="Phone")
         self.member_tree.heading("Type", text="Type")
 
+        # Set column widths
+        self.member_tree.column("ID", width=50)
+        self.member_tree.column("Number", width=100)
+        self.member_tree.column("Name", width=150)
+        self.member_tree.column("Email", width=200)
+        self.member_tree.column("Phone", width=120)
+        self.member_tree.column("Type", width=100)
+
         self.member_tree.bind("<<TreeviewSelect>>", self.on_member_select)
 
         scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=self.member_tree.yview)
@@ -79,7 +86,7 @@ class MemberManagementFrame(tk.Frame):
         scrollbar.pack(side="right", fill="y")
 
         # Borrowing History
-        history_frame = tk.LabelFrame(self, text="Borrowing History", font=("Arial", 12))
+        history_frame = tk.LabelFrame(self, text="Borrowing History")
         history_frame.pack(fill="x", padx=20, pady=10)
 
         self.history_tree = ttk.Treeview(history_frame, columns=("Book", "Issue Date", "Due Date", "Return Date", "Fine", "Status"), show="headings", height=5)
@@ -89,6 +96,14 @@ class MemberManagementFrame(tk.Frame):
         self.history_tree.heading("Return Date", text="Return Date")
         self.history_tree.heading("Fine", text="Fine")
         self.history_tree.heading("Status", text="Status")
+
+        # Set column widths
+        self.history_tree.column("Book", width=200)
+        self.history_tree.column("Issue Date", width=100)
+        self.history_tree.column("Due Date", width=100)
+        self.history_tree.column("Return Date", width=100)
+        self.history_tree.column("Fine", width=80)
+        self.history_tree.column("Status", width=100)
 
         scrollbar_history = ttk.Scrollbar(history_frame, orient="vertical", command=self.history_tree.yview)
         self.history_tree.configure(yscrollcommand=scrollbar_history.set)

@@ -1,9 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from datetime import datetime, timedelta
 from database.db_manager import get_all_members, get_all_books, issue_book, return_book, get_all_transactions
-from notifications.email_sender import send_due_reminder, send_overdue_notification
-from utils.helpers import calculate_fine
 
 class TransactionFrame(tk.Frame):
     def __init__(self, parent):
@@ -16,7 +13,7 @@ class TransactionFrame(tk.Frame):
         title_label.pack(pady=10)
 
         # Issue Book Section
-        issue_frame = tk.LabelFrame(self, text="Issue Book", font=("Arial", 12))
+        issue_frame = tk.LabelFrame(self, text="Issue Book")
         issue_frame.pack(fill="x", padx=20, pady=10)
 
         # Member Selection
@@ -37,7 +34,7 @@ class TransactionFrame(tk.Frame):
         tk.Button(issue_frame, text="Issue Book", command=self.issue_book).grid(row=2, column=0, columnspan=2, pady=10)
 
         # Return Book Section
-        return_frame = tk.LabelFrame(self, text="Return Book", font=("Arial", 12))
+        return_frame = tk.LabelFrame(self, text="Return Book")
         return_frame.pack(fill="x", padx=20, pady=10)
 
         # Transaction Selection
@@ -51,7 +48,7 @@ class TransactionFrame(tk.Frame):
         tk.Button(return_frame, text="Return Book", command=self.return_book).grid(row=1, column=0, columnspan=2, pady=10)
 
         # All Transactions
-        list_frame = tk.LabelFrame(self, text="All Transactions", font=("Arial", 12))
+        list_frame = tk.LabelFrame(self, text="All Transactions")
         list_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         self.transaction_tree = ttk.Treeview(list_frame, columns=("ID", "Member", "Book", "Issue Date", "Due Date", "Return Date", "Fine", "Status"), show="headings", height=10)
@@ -64,6 +61,16 @@ class TransactionFrame(tk.Frame):
         self.transaction_tree.heading("Fine", text="Fine")
         self.transaction_tree.heading("Status", text="Status")
 
+        # Set column widths
+        self.transaction_tree.column("ID", width=50)
+        self.transaction_tree.column("Member", width=150)
+        self.transaction_tree.column("Book", width=200)
+        self.transaction_tree.column("Issue Date", width=100)
+        self.transaction_tree.column("Due Date", width=100)
+        self.transaction_tree.column("Return Date", width=100)
+        self.transaction_tree.column("Fine", width=80)
+        self.transaction_tree.column("Status", width=100)
+
         scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=self.transaction_tree.yview)
         self.transaction_tree.configure(yscrollcommand=scrollbar.set)
         self.transaction_tree.pack(side="left", fill="both", expand=True)
@@ -73,18 +80,21 @@ class TransactionFrame(tk.Frame):
 
     def refresh_member_combo(self):
         members = get_all_members()
-        member_list = [f"{m[1]} - {m[2]} {m[3]}" for m in members]
+        member_list = [f"{m[0]} - {m[2]} {m[3]}" for m in members]  # Use member_id for ID
         self.member_combo['values'] = member_list
+        self.member_var.set("")  # Clear selection
 
     def refresh_book_combo(self):
         books = get_all_books()
-        book_list = [f"{b[1]} - {b[2]}" for b in books if b[12] > 0]  # Only available books
+        book_list = [f"{b[0]} - {b[2]}" for b in books if b[12] > 0]  # Only available books
         self.book_combo['values'] = book_list
+        self.book_var.set("")  # Clear selection
 
     def refresh_transaction_combo(self):
         transactions = get_all_transactions()
         trans_list = [f"{t[0]} - {t[1]} - {t[2]}" for t in transactions if t[7] == 'Issued']
         self.transaction_combo['values'] = trans_list
+        self.transaction_var.set("")  # Clear selection
 
     def issue_book(self):
         member_selection = self.member_combo.get()
@@ -94,7 +104,6 @@ class TransactionFrame(tk.Frame):
             messagebox.showwarning("Warning", "Please select both member and book")
             return
 
-        # Extract IDs from selection strings
         member_id = int(member_selection.split(" - ")[0])
         book_id = int(book_selection.split(" - ")[0])
 

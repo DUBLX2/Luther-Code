@@ -1,7 +1,69 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from config import DB_PATH
 
+# ✅ Initialize database and create tables if they don't exist
+def initialize_database():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Create Books table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Books (
+            book_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            isbn TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            author TEXT,
+            publisher TEXT,
+            publication_year TEXT,
+            category TEXT,
+            description TEXT,
+            cover_image_url TEXT,
+            page_count INTEGER,
+            language TEXT,
+            total_copies INTEGER,
+            available_copies INTEGER,
+            shelf_location TEXT
+        )
+    """)
+
+    # Create Members table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Members (
+            member_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            membership_number TEXT UNIQUE NOT NULL,
+            first_name TEXT NOT NULL,
+            last_name TEXT NOT NULL,
+            email TEXT,
+            phone TEXT,
+            address TEXT,
+            join_date TEXT,
+            membership_type TEXT,
+            status TEXT
+        )
+    """)
+
+    # Create Transactions table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Transactions (
+            transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            member_id INTEGER,
+            book_id INTEGER,
+            issue_date TEXT,
+            due_date TEXT,
+            return_date TEXT,
+            fine_amount REAL DEFAULT 0,
+            status TEXT,
+            FOREIGN KEY(member_id) REFERENCES Members(member_id),
+            FOREIGN KEY(book_id) REFERENCES Books(book_id)
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+# ✅ Book-related functions
 def add_book(isbn, title, author, publisher, publication_year, category, description, cover_image_url, page_count, language, total_copies, shelf_location):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -45,6 +107,8 @@ def delete_book(book_id):
     conn.commit()
     conn.close()
 
+
+# ✅ Member-related functions
 def add_member(membership_number, first_name, last_name, email, phone, address, membership_type):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -71,17 +135,15 @@ def get_all_members():
     conn.close()
     return members
 
+
+# ✅ Transaction-related functions
 def issue_book(member_id, book_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    # Check if book is available
     cursor.execute("SELECT available_copies FROM Books WHERE book_id = ?", (book_id,))
     available = cursor.fetchone()
     if available and available[0] > 0:
-        # Update available copies
         cursor.execute("UPDATE Books SET available_copies = available_copies - 1 WHERE book_id = ?", (book_id,))
-        # Insert transaction
-        from datetime import datetime, timedelta
         issue_date = datetime.now().strftime("%Y-%m-%d")
         due_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
         cursor.execute("""
@@ -102,10 +164,7 @@ def return_book(transaction_id):
     book_id = cursor.fetchone()
     if book_id:
         book_id = book_id[0]
-        # Update available copies
         cursor.execute("UPDATE Books SET available_copies = available_copies + 1 WHERE book_id = ?", (book_id,))
-        # Update transaction
-        from datetime import datetime
         return_date = datetime.now().strftime("%Y-%m-%d")
         cursor.execute("UPDATE Transactions SET return_date = ?, status = 'Returned' WHERE transaction_id = ?", (return_date, transaction_id))
         conn.commit()

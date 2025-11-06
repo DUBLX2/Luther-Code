@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-
-
+from database.db_manager import add_member
 
 class RegistrationForm:
     def __init__(self, root):
@@ -36,25 +35,31 @@ class RegistrationForm:
         self.membership_type = tk.Entry(root)
         self.membership_type.grid(row=6, column=1, padx=10, pady=5)
 
-        tk.Label(root, text="Status:").grid(row=7, column=0, padx=10, pady=5)
-        self.status = tk.Entry(root)
-        self.status.grid(row=7, column=1, padx=10, pady=5)
-
-        tk.Button(root, text="Register Member", command=self.register_member).grid(row=8, column=1, pady=10)
+        tk.Button(root, text="Register Member", command=self.register_member).grid(row=7, column=1, pady=10)
 
     def register_member(self):
-        member_number = self.member_number.get()
-        first_name = self.first_name.get()
-        last_name = self.last_name.get()
-        email = self.email.get()
-        phone = self.phone.get()
-        address = self.address.get()
-        membership_type = self.membership_type.get()
-        status = self.status.get()
+        member_number = self.member_number.get().strip()
+        first_name = self.first_name.get().strip()
+        last_name = self.last_name.get().strip()
+        email = self.email.get().strip()
+        phone = self.phone.get().strip()
+        address = self.address.get().strip()
+        membership_type = self.membership_type.get().strip()
 
         if not all([member_number, first_name, last_name, email]):
-            messagebox.showerror("Please fill in all required fields")
+            messagebox.showerror("Error", "Please fill in all required fields")
+            return
 
+        try:
+            add_member(member_number, first_name, last_name, email, phone, address, membership_type)
+            messagebox.showinfo("Success", "Member registered successfully!")
+            self.clear_form()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to register member: {e}")
+
+    def clear_form(self):
+        for entry in [self.member_number, self.first_name, self.last_name, self.email, self.phone, self.address, self.membership_type]:
+            entry.delete(0, tk.END)
 
 root = tk.Tk()
 app = RegistrationForm(root)

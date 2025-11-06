@@ -4,15 +4,16 @@ from gui.dashboard import DashboardFrame
 from gui.book_management import BookManagementFrame
 from gui.member_management import MemberManagementFrame
 from gui.transaction_ui import TransactionFrame
+from database.db_manager import initialize_database  # ✅ Correct import
 
 class LibraryApp:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, master):
+        self.root = master
         self.root.title("Library Management System")
         self.root.geometry("1000x700")
 
         # Create notebook for tabs
-        self.notebook = ttk.Notebook(root)
+        self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill="both", expand=True)
 
         # Create frames
@@ -28,6 +29,7 @@ class LibraryApp:
         self.notebook.add(self.transaction_frame, text="Transactions")
 
 if __name__ == "__main__":
+    initialize_database()  # ✅ Ensure tables exist before GUI starts
     root = tk.Tk()
     app = LibraryApp(root)
     root.mainloop()
